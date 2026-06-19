@@ -3,14 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contact Us | Voya Bite</title>
+    <title>Booking Ledger | Voya Bite</title>
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
     <link rel="stylesheet" href="./style.css" />
     <link
@@ -19,6 +15,292 @@
       sizes="512x512"
       href="/favicon-512x512.png"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+      /* Voya Bite theme variables - matches your main site */
+      :root {
+        --bg: #f8fafc;
+        --bg-elev: #ffffff;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      }
+
+      [data-theme="dark"] {
+        --bg: #0f172a;
+        --bg-elev: #1e293b;
+        --text: #f1f5f9;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+
+      [data-color="blue"] {
+        --primary: #2c7ab5;
+        --primary-hover: #236091;
+      }
+      [data-color="green"] {
+        --primary: #219a52;
+        --primary-hover: #1a7d42;
+      }
+      [data-color="purple"] {
+        --primary: #7d3c98;
+        --primary-hover: #632f7a;
+      }
+      [data-color="orange"] {
+        --primary: #d35400;
+        --primary-hover: #a84300;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 0;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      /* Match Voya Bite nav + theme controls */
+      .theme-controls {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 12px;
+        z-index: 100;
+        align-items: center;
+      }
+
+      .theme-btn {
+        background: var(--bg-elev);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px;
+        cursor: pointer;
+        color: var(--text);
+        box-shadow: var(--shadow);
+      }
+
+      .color-switcher {
+        display: flex;
+        gap: 6px;
+        background: var(--bg-elev);
+        padding: 6px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      .color-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 2px solid transparent;
+        cursor: pointer;
+      }
+      .color-btn.active {
+        border-color: var(--text);
+      }
+
+      .ledger-container {
+        max-width: 1200px;
+        margin: 100px auto 40px;
+        padding: 0 20px;
+      }
+
+      .ledger-header {
+        margin-bottom: 32px;
+      }
+
+      .ledger-header h1 {
+        font-size: 2rem;
+        margin: 0 0 8px;
+      }
+
+      .ledger-header p {
+        color: var(--text-muted);
+        margin: 0;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background: var(--bg-elev);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+      }
+
+      .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+      }
+
+      .btn:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+      }
+
+      .btn-danger {
+        background: #dc2626;
+      }
+      .btn-danger:hover {
+        background: #b91c1c;
+      }
+
+      form {
+        background: var(--bg-elev);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      input,
+      select {
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        background: var(--bg);
+        color: var(--text);
+        flex: 1;
+        min-width: 180px;
+      }
+
+      input:focus,
+      select:focus {
+        outline: 2px solid var(--primary);
+        border-color: var(--primary);
+      }
+
+      .table-wrapper {
+        background: var(--bg-elev);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th {
+        background: var(--bg);
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .empty-state {
+        background: var(--bg-elev);
+        padding: 60px 40px;
+        text-align: center;
+        border-radius: 12px;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+      }
+
+      .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+      }
+
+      .pass {
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .source-tag {
+        font-size: 11px;
+        background: color-mix(in srgb, var(--primary) 15%, transparent);
+        color: var(--primary);
+        padding: 3px 8px;
+        border-radius: 6px;
+        margin-left: 6px;
+        font-weight: 600;
+      }
+
+      #currentPeriod {
+        margin: 16px 0;
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      @media (max-width: 768px) {
+        .theme-controls {
+          top: 12px;
+          right: 12px;
+        }
+        .ledger-container {
+          margin-top: 80px;
+        }
+        form {
+          flex-direction: column;
+        }
+        input,
+        select {
+          min-width: 100%;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="theme-controls">
@@ -58,274 +340,327 @@
       </div>
     </div>
 
-    <nav>
-      <div class="nav_header">
-        <div class="nav_logo">
-          <a href="home.html"
-            ><img
-              src="https://i.ibb.co/gZ7MMqFb/Voya-Byte-Logo-removebg-preview.png"
-              alt="Voya Bite logo"
-              width="200"
-              height="53"
-          /></a>
+    <div class="ledger-container">
+      <div class="ledger-header">
+        <h1>Booking Ledger</h1>
+        <p>All bookings from Voya Bite are recorded here automatically</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Total Bookings</div>
+          <div class="stat-value" id="totalBookings">0</div>
         </div>
-        <button class="nav_menu_btn" id="menu-btn" aria-label="Open menu">
-          <span class="material-symbols-outlined">menu</span>
+        <div class="stat-card">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value" id="totalRevenue">R0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Booking Value</div>
+          <div class="stat-value" id="avgBooking">-</div>
+        </div>
+      </div>
+
+      <form id="bookingForm">
+        <input
+          type="text"
+          id="customerName"
+          placeholder="Customer name"
+          required
+        />
+        <select id="adventure" required>
+          <option value="">Select adventure...</option>
+          <option value="2200|Cape Town Hike">Cape Town Hike - R2,200</option>
+          <option value="6500|Kruger Safari Day">
+            Kruger Safari Day - R6,500
+          </option>
+          <option value="1600|Shark Cage Diving">
+            Shark Cage Diving - R1,600
+          </option>
+          <option value="3700|Table Mountain Abseil">
+            Table Mountain Abseil - R3,700
+          </option>
+          <option value="1750|Wine Tram Tour">Wine Tram Tour - R1,750</option>
+        </select>
+        <button type="submit" class="btn">Record Booking</button>
+        <button type="button" class="btn" onclick="exportPDF()">
+          Export PDF
         </button>
-      </div>
-      <ul class="nav_links" id="nav-links">
-        <li><a href="home.html">Home</a></li>
-        <li><a href="services.html">Services</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="FAQ.html">FAQ</a></li>
-        <li><a href="contact.html" aria-current="page">Contact</a></li>
-      </ul>
-      <div class="nav_btns">
-        <button
-          class="btn btn-outline"
-          onclick="window.location.href = 'services.html#sv-filter-bar'"
-        >
-          Plan My Trip
+        <button type="button" class="btn btn-danger" onclick="resetAll()">
+          Reset All
         </button>
-      </div>
-    </nav>
+      </form>
 
-    <main>
-      <section class="about-hero">
-        <h1>Get In Touch</h1>
-        <p>
-          Have a question or want to work together? We'd love to hear from you.
-          Send us a message and we'll respond as soon as possible.
-        </p>
-      </section>
+      <div id="currentPeriod"></div>
+      <div id="bookingTable"></div>
+    </div>
 
-      <section class="about-section" id="contact">
-        <h2>We're Here to Help</h2>
-        <p>
-          Our team is ready to answer your questions and provide the support you
-          need. Reach out to us through any of the channels below, or fill out
-          our contact form and we'll get back to you within 24 hours.
-        </p>
-      </section>
+    <script>
+      const STORAGE_KEY = "adventureBookingState";
+      const INCOMING_BOOKING_KEY = "voyaBiteNewBooking";
 
-      <section class="team">
-        <h2 class="team-title">Contact Information</h2>
-        <div class="team-container">
-          <div class="member">
-            <div class="icon-wrap">
-              <i class="fas fa-phone"></i>
-            </div>
-            <h3>Phone</h3>
-            <p>
-              +27 800 123 456<br /><span
-                style="font-size: 0.9rem; color: var(--text-muted)"
-                >Mon-Fri 9am-6pm</span
-              >
-            </p>
-          </div>
+      // Theme handling - matches Voya Bite
+      const themeToggle = document.getElementById("theme-toggle");
+      const colorBtns = document.querySelectorAll(".color-btn");
+      const html = document.documentElement;
 
-          <div class="member">
-            <div class="icon-wrap">
-              <i class="fas fa-envelope"></i>
-            </div>
-            <h3>Email</h3>
-            <p>
-              info@voyabite.com<br /><span
-                style="font-size: 0.9rem; color: var(--text-muted)"
-                >24/7 Online Support</span
-              >
-            </p>
-          </div>
+      // Load saved theme
+      const savedTheme = localStorage.getItem("vb-theme") || "light";
+      const savedColor = localStorage.getItem("vb-color") || "blue";
+      html.setAttribute("data-theme", savedTheme);
+      html.setAttribute("data-color", savedColor);
 
-          <div class="member">
-            <div class="icon-wrap">
-              <i class="fas fa-map-marker-alt"></i>
-            </div>
-            <h3>Office</h3>
-            <p>
-              Imam Haron Road, Lansdowne<br /><span
-                style="font-size: 0.9rem; color: var(--text-muted)"
-                >Cape Town, 7780</span
-              >
-            </p>
-          </div>
-        </div>
-      </section>
+      themeToggle.querySelector("span").textContent =
+        savedTheme === "dark" ? "light_mode" : "dark_mode";
+      document
+        .querySelector(`[data-color="${savedColor}"]`)
+        .classList.add("active");
 
-      <section class="contact-form-section">
-        <div class="form-container">
-          <h2>Send us a Message</h2>
+      themeToggle.addEventListener("click", () => {
+        const current = html.getAttribute("data-theme");
+        const next = current === "light" ? "dark" : "light";
+        html.setAttribute("data-theme", next);
+        localStorage.setItem("vb-theme", next);
+        themeToggle.querySelector("span").textContent =
+          next === "dark" ? "light_mode" : "dark_mode";
+      });
 
-          <div id="successMessage" class="success-message">
-            <i class="fas fa-check-circle"></i>
-            <div>
-              <strong>Message Sent Successfully!</strong><br />
-              <span style="font-size: 0.9rem"
-                >We'll get back to you within 24 hours.</span
-              >
-            </div>
-          </div>
+      colorBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const color = btn.getAttribute("data-color");
+          html.setAttribute("data-color", color);
+          localStorage.setItem("vb-color", color);
+          colorBtns.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+        });
+      });
 
-          <div id="errorMessage" class="error-message">
-            <i class="fas fa-exclamation-circle"></i>
-            <div>
-              <strong>Oops! Something went wrong</strong><br />
-              <span style="font-size: 0.9rem"
-                >Please try again or email us directly.</span
-              >
-            </div>
-          </div>
+      // Booking logic
+      function getCurrentPeriod() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      }
 
-          <form
-            id="contactForm"
-            action="https://formspree.io/f/xojzzarb"
-            method="POST"
-          >
-            <div class="form-row">
-              <div class="form-group">
-                <label for="name">Full Name *</label>
-                <input type="text" id="name" name="name" required />
-                <p class="error-text" id="nameError">Please enter your name</p>
-              </div>
+      function loadBookings() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        const data = saved
+          ? JSON.parse(saved)
+          : { bookings: [], period: getCurrentPeriod(), archive: [] };
 
-              <div class="form-group">
-                <label for="email">Email Address *</label>
-                <input type="email" id="email" name="email" required />
-                <p class="error-text" id="emailError">
-                  Please enter a valid email
-                </p>
-              </div>
-            </div>
+        const currentPeriod = getCurrentPeriod();
+        if (data.period !== currentPeriod) {
+          if (data.bookings.length > 0) {
+            data.archive = data.archive || [];
+            data.archive.push({
+              period: data.period,
+              bookings: data.bookings,
+              totalRevenue: data.bookings.reduce((s, b) => s + b.price, 0),
+            });
+          }
+          data.bookings = [];
+          data.period = currentPeriod;
+          saveBookings(data);
+        }
+        return data;
+      }
 
-            <div class="form-group">
-              <label for="subject">Subject *</label>
-              <input
-                type="text"
-                id="subject"
-                name="_subject"
-                required
-                placeholder="How can we help you?"
-              />
-              <p class="error-text" id="subjectError">Please enter a subject</p>
-            </div>
+      function saveBookings(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
 
-            <div class="form-group">
-              <label for="message">Message *</label>
-              <textarea
-                id="message"
-                name="message"
-                rows="5"
-                required
-                placeholder="Tell us more about your inquiry..."
-              ></textarea>
-              <p class="error-text" id="messageError">
-                Please enter your message
-              </p>
-              <p class="char-counter">
-                <span id="charCount">0</span>/500 characters
-              </p>
-            </div>
+      function addBooking(
+        name,
+        packageName,
+        price,
+        source = "Manual",
+        extra = {},
+      ) {
+        const data = loadBookings();
+        data.bookings.push({
+          name,
+          package: packageName,
+          price: Number(price),
+          source,
+          timestamp: new Date().toISOString(),
+          ...extra,
+        });
+        saveBookings(data);
+        renderBookings();
+        updateStats();
+      }
 
-            <div class="form-footer">
-              <p class="form-note">
-                <i class="fas fa-info-circle"></i>
-                All fields marked with * are required
-              </p>
-              <button type="submit" id="submitBtn" class="submit-btn">
-                <span id="btnText">
-                  <i class="fas fa-paper-plane"></i> Send Message
-                </span>
-                <span id="btnLoading" style="display: none">
-                  <i class="fas fa-spinner fa-spin"></i> Sending...
-                </span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
-    </main>
+      window.addEventListener("storage", (e) => {
+        if (e.key === INCOMING_BOOKING_KEY && e.newValue) {
+          const bookingData = JSON.parse(e.newValue);
+          addBooking(
+            bookingData.name,
+            bookingData.package,
+            bookingData.price,
+            "Voya Bite",
+            {
+              email: bookingData.email,
+              phone: bookingData.phone,
+              startDate: bookingData.startDate,
+              endDate: bookingData.endDate,
+              adults: bookingData.adults,
+              children: bookingData.children,
+              location: bookingData.location,
+            },
+          );
+          localStorage.removeItem(INCOMING_BOOKING_KEY);
+        }
+      });
 
-    <footer class="site-footer">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a class="footer-logo" href="home.html"
-            ><img
-              src="https://i.ibb.co/fGBzY2Ft/Screenshot-2026-06-10-152732-Copy.png"
-              alt="Voya Bite Logo"
-          /></a>
-          <p>
-            Bite-sized escapes, big memories. Curated trips, hotels and flights.
-          </p>
-        </div>
-        <div class="footer-links">
-          <h4>Quick Links</h4>
-          <a href="home.html">Home</a>
-          <a href="about.html">About Us</a>
-          <a href="FAQ.html">FAQ's</a>
-          <a href="contact.html">Contact Us</a>
-        </div>
-        <div class="footer-contact">
-          <h4>Contact Us</h4>
-          <ul>
-            <li>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#F3F3F3"
-              >
-                <path
-                  d="M280-280q-33 0-56.5-23.5T200-360v-400q0-33 23.5-56.5T280-840h560q33 0 56.5 23.5T920-760v400q0 33-23.5 56.5T840-280H280Zm280-188L280-663v303h560v-303L560-468Zm0-98 280-194H280l280 194ZM120-120q-33 0-56.5-23.5T40-200v-500h80v500h660v80H120Zm720-546v-94H280v94-94h560v94Z"
-                />
-              </svg>
-              info@voyabite.com
-            </li>
-            <li>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#F3F3F3"
-              >
-                <path
-                  d="M162-120q-18 0-30-12t-12-30v-162q0-13 9-23.5t23-14.5l138-28q14-2 28.5 2.5T342-374l94 94q38-22 72-48.5t65-57.5q33-32 60.5-66.5T681-524l-97-98q-8-8-11-19t-1-27l26-140q2-13 13-22.5t25-9.5h162q18 0 30 12t12 30q0 125-54.5 247T631-329Q531-229 409-174.5T162-120Zm556-480q17-39 26-79t14-81h-88l-18 94 66 66ZM360-244l-66-66-94 20v88q41-3 81-14t79-28Zm358-356ZM360-244Z"
-                />
-              </svg>
-              +27 800 123 456
-            </li>
-            <li>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#F3F3"
-              >
-                <path
-                  d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"
-                />
-              </svg>
-              Imam Haron Road, Lansdowne, 7780
-            </li>
-          </ul>
-        </div>
-        <div class="footer-follow">
-          <h4>Follow Us</h4>
-          <ul class="footer-list">
-            <li><i class="fa fa-github" style="font-size: 24px"></i></li>
-            <li>
-              <i class="fa fa-linkedin-square" style="font-size: 24px"></i>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2026 Voya Bite. Crafted with care and simplicity.</p>
-      </div>
-    </footer>
+      function checkIncomingBooking() {
+        const incoming = localStorage.getItem(INCOMING_BOOKING_KEY);
+        if (incoming) {
+          const bookingData = JSON.parse(incoming);
+          addBooking(
+            bookingData.name,
+            bookingData.package,
+            bookingData.price,
+            "Voya Bite",
+            {
+              email: bookingData.email,
+              phone: bookingData.phone,
+              startDate: bookingData.startDate,
+              endDate: bookingData.endDate,
+              adults: bookingData.adults,
+              children: bookingData.children,
+              location: bookingData.location,
+            },
+          );
+          localStorage.removeItem(INCOMING_BOOKING_KEY);
+        }
+      }
 
-    <script src="./main.js"></script>
+      function resetAll() {
+        if (
+          !confirm("Reset ALL bookings for this month? This cannot be undone.")
+        )
+          return;
+        const data = loadBookings();
+        if (data.bookings.length > 0) {
+          data.archive = data.archive || [];
+          data.archive.push({
+            period: data.period + " (manual reset)",
+            bookings: data.bookings,
+            totalRevenue: data.bookings.reduce((s, b) => s + b.price, 0),
+            resetAt: new Date().toISOString(),
+          });
+        }
+        data.bookings = [];
+        saveBookings(data);
+        renderBookings();
+        updateStats();
+      }
+
+      function updateStats() {
+        const data = loadBookings();
+        const bookings = data.bookings || [];
+        document.getElementById("totalBookings").textContent = bookings.length;
+        const totalRevenue = bookings.reduce((sum, b) => sum + b.price, 0);
+        document.getElementById("totalRevenue").textContent =
+          "R" + totalRevenue.toFixed(2);
+        const avgBooking = bookings.length
+          ? (totalRevenue / bookings.length).toFixed(2)
+          : "-";
+        document.getElementById("avgBooking").textContent =
+          avgBooking !== "-" ? "R" + avgBooking : "-";
+        document.getElementById("currentPeriod").textContent =
+          `Current period: ${data.period} | Auto-resets on 1st of each month`;
+      }
+
+      function renderBookings() {
+        const data = loadBookings();
+        const bookings = data.bookings || [];
+        if (bookings.length === 0) {
+          document.getElementById("bookingTable").innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🧳</div>
+              <p>No bookings for ${data.period} yet.</p>
+            </div>`;
+          return;
+        }
+        let html =
+          '<div class="table-wrapper"><table><thead><tr><th>Customer</th><th>Adventure Package</th><th>Price</th><th>Date</th><th>Details</th></tr></thead><tbody>';
+        [...bookings].reverse().forEach((b) => {
+          const date = new Date(b.timestamp).toLocaleDateString();
+          const sourceTag = b.source
+            ? `<span class="source-tag">${b.source}</span>`
+            : "";
+          const details = b.email
+            ? `${b.email}<br>${b.phone || ""}<br>Adults: ${b.adults || 1}, Children: ${b.children || 0}`
+            : "-";
+          html += `<tr>
+            <td>${b.name} ${sourceTag}</td>
+            <td>${b.package}<br><small style="color:var(--text-muted)">${b.location || ""}</small></td>
+            <td class="pass">R${b.price}</td>
+            <td>${date}<br><small style="color:var(--text-muted)">${b.startDate || ""}</small></td>
+            <td style="font-size:12px;color:var(--text-muted)">${details}</td>
+          </tr>`;
+        });
+        html += "</tbody></table></div>";
+        document.getElementById("bookingTable").innerHTML = html;
+      }
+
+      function exportPDF() {
+        const data = loadBookings();
+        const bookings = data.bookings || [];
+        if (bookings.length === 0) {
+          alert("No data to export");
+          return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF("l", "mm", "a4");
+        doc.setFontSize(20);
+        doc.setTextColor(44, 122, 181);
+        doc.text(`Voya Bite Bookings - ${data.period}`, 14, 20);
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 28);
+        const totalRevenue = bookings.reduce((s, b) => s + b.price, 0);
+        doc.text(
+          `Total Bookings: ${bookings.length} | Total Revenue: R${totalRevenue.toFixed(2)}`,
+          14,
+          35,
+        );
+        const rows = bookings.map((b) => [
+          `${b.name} (${b.source || "Manual"})`,
+          b.package,
+          `R${b.price}`,
+          new Date(b.timestamp).toLocaleDateString(),
+          b.email || "-",
+        ]);
+        doc.autoTable({
+          head: [["Customer", "Adventure", "Price", "Date", "Email"]],
+          body: rows,
+          startY: 42,
+          theme: "grid",
+          headStyles: {
+            fillColor: [44, 122, 181],
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+          },
+        });
+        doc.save(`voya_bite_bookings_${data.period}.pdf`);
+      }
+
+      document.getElementById("bookingForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("customerName").value.trim();
+        const [price, packageName] = document
+          .getElementById("adventure")
+          .value.split("|");
+        if (!name || !packageName) return;
+        addBooking(name, packageName, Number(price), "Manual");
+        e.target.reset();
+      });
+
+      // Init
+      checkIncomingBooking();
+      renderBookings();
+      updateStats();
+    </script>
   </body>
 </html>
