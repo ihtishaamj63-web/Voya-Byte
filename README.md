@@ -73,6 +73,6 @@ Four color themes (blue, green, purple, orange) plus light/dark mode. Preference
 
 ## Links
 
-- Figma: [add link]
-- GitHub: [add link]
-- Live site: [add link]
+- Figma: https://www.figma.com/design/WcYBszkLji8bDsXQ0UPpXD/HTML--CSS---JavaScript-Showcase-Brief?m=auto&t=QRlCwrhpymZjPT4g-1
+- GitHub: https://github.com/ihtishaamj63-web/Voya-Byte.git
+- Live site: https://ihtishaamj63-web.github.io/Voya-Byte/
