@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-color="blue">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Voya Bite</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/favicon-512x512.png"
+    />
+  </head>
+  <body>
+    <div class="theme-controls">
+      <button
+        id="theme-toggle"
+        class="theme-btn"
+        aria-label="Toggle dark mode"
+        title="Toggle dark mode"
+      >
+        <span class="material-symbols-outlined">dark_mode</span>
+      </button>
+      <div class="color-switcher">
+        <button
+          class="color-btn active"
+          data-color="blue"
+          title="Blue theme"
+          style="background: #2c7ab5"
+        ></button>
+        <button
+          class="color-btn"
+          data-color="green"
+          title="Green theme"
+          style="background: #219a52"
+        ></button>
+        <button
+          class="color-btn"
+          data-color="purple"
+          title="Purple theme"
+          style="background: #7d3c98"
+        ></button>
+        <button
+          class="color-btn"
+          data-color="orange"
+          title="Orange theme"
+          style="background: #d35400"
+        ></button>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav_header">
+        <div class="nav_logo">
+          <a href="index.html"
+            ><img
+              src="https://i.ibb.co/gZ7MMqFb/Voya-Byte-Logo-removebg-preview.png"
+              alt="Voya Bite logo"
+              width="200"
+              height="53"
+          /></a>
+        </div>
+        <button class="nav_menu_btn" id="menu-btn" aria-label="Open menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+    </nav>
+
+    <main>
+      <section class="about-hero">
+        <h1>Welcome to Voya Bite</h1>
+        <p>
+          Log in to access your trips, saved destinations, and personalized
+          recommendations.
+        </p>
+      </section>
+
+      <section class="login-section">
+        <div class="login-form-container">
+          <div id="successMessage" class="login-success-message">
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <strong>Success!</strong><br />
+              <span style="font-size: 0.9rem">Redirecting to home...</span>
+            </div>
+          </div>
+
+          <div id="errorMessage" class="login-error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>
+              <strong>Login Failed</strong><br />
+              <span style="font-size: 0.9rem" id="errorText"
+                >Please check your details.</span
+              >
+            </div>
+          </div>
+
+          <div id="sessionExpiredMessage" class="login-error-message">
+            <i class="fas fa-clock"></i>
+            <div>
+              <strong>Session Expired</strong><br />
+              <span style="font-size: 0.9rem"
+                >Please log in again after 3 visits.</span
+              >
+            </div>
+          </div>
+
+          <!-- Login Form -->
+          <form id="loginForm">
+            <h2>Sign In</h2>
+            <p class="subtitle">Enter your details to continue your journey</p>
+
+            <div class="login-form-group">
+              <label for="loginEmail">Email Address *</label>
+              <input type="email" id="loginEmail" name="email" required />
+              <p class="login-error-text" id="loginEmailError">
+                Please enter a valid email
+              </p>
+            </div>
+
+            <div class="login-form-group">
+              <label for="loginPassword">Password *</label>
+              <input
+                type="password"
+                id="loginPassword"
+                name="password"
+                required
+              />
+              <p class="login-error-text" id="loginPasswordError">
+                Password is required
+              </p>
+            </div>
+
+            <div
+              class="login-form-group"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-top: -0.5rem;
+              "
+            >
+              <input type="checkbox" id="rememberMe" style="width: auto" />
+              <label for="rememberMe" style="margin: 0; font-weight: 400"
+                >Remember me</label
+              >
+            </div>
+
+            <button type="submit" class="login-submit-btn">
+              <i class="fas fa-sign-in-alt"></i> Log In
+            </button>
+
+            <div class="login-form-toggle">
+              Don't have an account?
+              <button type="button" id="showSignup">Create one</button>
+            </div>
+          </form>
+
+          <!-- Signup Form -->
+          <form id="signupForm" style="display: none">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join Voya Bite and start exploring</p>
+
+            <div class="login-form-group">
+              <label for="signupName">Full Name *</label>
+              <input type="text" id="signupName" name="name" required />
+              <p class="login-error-text" id="signupNameError">
+                Please enter your name
+              </p>
+            </div>
+
+            <div class="login-form-group">
+              <label for="signupEmail">Email Address *</label>
+              <input type="email" id="signupEmail" name="email" required />
+              <p class="login-error-text" id="signupEmailError">
+                Please enter a valid email
+              </p>
+            </div>
+
+            <div class="login-form-group">
+              <label for="signupPassword">Password *</label>
+              <input
+                type="password"
+                id="signupPassword"
+                name="password"
+                required
+                minlength="6"
+              />
+              <p class="login-error-text" id="signupPasswordError">
+                Password must be 6+ characters
+              </p>
+            </div>
+
+            <button type="submit" class="login-submit-btn">
+              <i class="fas fa-user-plus"></i> Create Account
+            </button>
+
+            <div class="login-form-toggle">
+              Already have an account?
+              <button type="button" id="showLogin">Log in</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- Shared Footer -->
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="footer-logo" href="index.html"
+            ><img
+              src="https://i.ibb.co/fGBzY2Ft/Screenshot-2026-06-10-152732-Copy.png"
+              alt="Voya Bite Logo"
+          /></a>
+          <p>Bite-sized escapes, big memories.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <a href="home.html">Home</a>
+          <a href="about.html">About Us</a>
+          <a href="FAQ.html">FAQ's</a>
+          <a href="contact.html">Contact Us</a>
+        </div>
+        <div class="footer-contact">
+          <h4>Contact Us</h4>
+          <ul>
+            <li>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="20px"
+                viewBox="0 -960 960 960"
+                width="20px"
+                fill="#F3F3F3"
+              >
+                <path
+                  d="M280-280q-33 0-56.5-23.5T200-360v-400q0-33 23.5-56.5T280-840h560q33 0 56.5 23.5T920-760v400q0 33-23.5 56.5T840-280H280Zm280-188L280-663v303h560v-303L560-468Zm0-98 280-194H280l280 194ZM120-120q-33 0-56.5-23.5T40-200v-500h80v500h660v80H120Zm720-546v-94H280v94-94h560v94Z"
+                />
+              </svg>
+              >info@voyabite.com
+            </li>
+            <li>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="20px"
+                viewBox="0 -960 960 960"
+                width="20px"
+                fill="#F3F3F3"
+              >
+                <path
+                  d="M162-120q-18 0-30-12t-12-30v-162q0-13 9-23.5t23-14.5l138-28q14-2 28.5 2.5T342-374l94 94q38-22 72-48.5t65-57.5q33-32 60.5-66.5T681-524l-97-98q-8-8-11-19t-1-27l26-140q2-13 13-22.5t25-9.5h162q18 0 30 12t12 30q0 125-54.5 247T631-329Q531-229 409-174.5T162-120Zm556-480q17-39 26-79t14-81h-88l-18 94 66 66ZM360-244l-66-66-94 20v88q41-3 81-14t79-28Zm358-356ZM360-244Z"
+                />
+              </svg>
+              >+27 63 326 4567
+            </li>
+            <li>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="20px"
+                viewBox="0 -960 960 960"
+                width="20px"
+                fill="#F3F3F3"
+              >
+                <path
+                  d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"
+                />
+              </svg>
+              >314 Imam Haron Road, Lansdowne 7780
+            </li>
+          </ul>
+        </div>
+        <div class="footer-follow">
+          <h4>Follow Us</h4>
+          <ul class="footer-list">
+            <li><i class="fa-brands fa-github" style="font-size: 24px"></i></li>
+            <li>
+              <i class="fa-brands fa-linkedin" style="font-size: 24px"></i>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Voya Bite. All rights reserved.</p>
+      </div>
+    </footer>
+    <script src="./main.js"></script>
+  </body>
+</html>
