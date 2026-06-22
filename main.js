@@ -1589,7 +1589,7 @@ function checkSessionExpiry() {
     sessionExpiredMsg.style.display = "flex";
     localStorage.removeItem("voyaSession");
   }
-
+}
 
 function redirectToHome() {
   window.location.href = "home.html";
