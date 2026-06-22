@@ -1423,174 +1423,220 @@ function initContactPage() {
 }
 
 // ============================================
-// 9. LOGIN PAGE
+// 9. LOGIN PAGE - FIXED WITH INSTANT REDIRECT
 // ============================================
-function initLoginPage() {
-  const loginForm = document.getElementById("loginForm");
-  const signupForm = document.getElementById("signupForm");
-  const showSignupBtn = document.getElementById("showSignup");
-  const showLoginBtn = document.getElementById("showLogin");
-  const successMsg = document.getElementById("successMessage");
-  const errorMsg = document.getElementById("errorMessage");
-  const errorText = document.getElementById("errorText");
-  const sessionExpiredMsg = document.getElementById("sessionExpiredMessage");
 
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get("expired") === "true" && sessionExpiredMsg) {
-    sessionExpiredMsg.style.display = "flex";
+// ===== MOBILE MENU =====
+const menuBtn = document.getElementById("menu-btn");
+const navLinks = document.getElementById("nav-links");
+
+menuBtn?.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+  const icon = menuBtn.querySelector(".material-symbols-outlined");
+  icon.textContent = navLinks.classList.contains("active") ? "close" : "menu";
+});
+
+// ===== AUTH LOGIC =====
+const loginForm = document.getElementById("loginForm");
+const signupForm = document.getElementById("signupForm");
+const showSignupBtn = document.getElementById("showSignup");
+const showLoginBtn = document.getElementById("showLogin");
+
+const successMsg = document.getElementById("successMessage");
+const errorMsg = document.getElementById("errorMessage");
+const errorText = document.getElementById("errorText");
+const sessionExpiredMsg = document.getElementById("sessionExpiredMessage");
+
+// Check if already logged in
+checkExistingSession();
+checkSessionExpiry();
+
+// Toggle between login/signup forms
+showSignupBtn?.addEventListener("click", () => {
+  loginForm.style.display = "none";
+  signupForm.style.display = "block";
+  hideMessages();
+  clearErrors();
+});
+
+showLoginBtn?.addEventListener("click", () => {
+  signupForm.style.display = "none";
+  loginForm.style.display = "block";
+  hideMessages();
+  clearErrors();
+});
+
+// ===== SIGNUP =====
+signupForm?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  hideMessages();
+  clearErrors();
+
+  const name = document.getElementById("signupName").value.trim();
+  const email = document
+    .getElementById("signupEmail")
+    .value.trim()
+    .toLowerCase();
+  const password = document.getElementById("signupPassword").value;
+
+  let isValid = true;
+
+  if (name.length < 2) {
+    showFieldError("signupNameError");
+    isValid = false;
+  }
+  if (!validateEmail(email)) {
+    showFieldError("signupEmailError");
+    isValid = false;
+  }
+  if (password.length < 6) {
+    showFieldError("signupPasswordError");
+    isValid = false;
   }
 
-  const session = JSON.parse(localStorage.getItem("voyaSession"));
-  if (session?.loggedIn && session.remember) {
-    window.location.href = "home.html";
+  if (!isValid) return; // Get existing users
+
+  const users = getUsers(); // Check if email already exists
+
+  if (users.some((user) => user.email === email)) {
+    showError("An account with this email already exists");
+    return;
+  } // Create new user
+
+  users.push({ name, email, password });
+  localStorage.setItem("voyaUsers", JSON.stringify(users));
+
+  showSuccess("Account created! Logging you in..."); // Auto login after signup
+
+  setTimeout(() => {
+    createSession(email, name, false);
+    redirectToHome();
+  }, 1200);
+});
+
+// ===== LOGIN =====
+loginForm?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  hideMessages();
+  clearErrors();
+
+  const email = document
+    .getElementById("loginEmail")
+    .value.trim()
+    .toLowerCase();
+  const password = document.getElementById("loginPassword").value;
+  const rememberMe = document.getElementById("rememberMe").checked;
+
+  let isValid = true;
+
+  if (!validateEmail(email)) {
+    showFieldError("loginEmailError");
+    isValid = false;
+  }
+  if (!password) {
+    showFieldError("loginPasswordError");
+    isValid = false;
+  }
+
+  if (!isValid) return;
+
+  const users = getUsers();
+  const user = users.find((u) => u.email === email && u.password === password);
+
+  if (!user) {
+    showError("Invalid email or password");
     return;
   }
 
-  showSignupBtn?.addEventListener("click", () => {
-    loginForm.style.display = "none";
-    signupForm.style.display = "block";
-    hideMessages();
-    clearErrors();
-  });
+  showSuccess("Login successful!");
+  createSession(email, user.name, rememberMe);
 
-  showLoginBtn?.addEventListener("click", () => {
-    signupForm.style.display = "none";
-    loginForm.style.display = "block";
-    hideMessages();
-    clearErrors();
-  });
+  setTimeout(() => {
+    redirectToHome();
+  }, 1200);
+});
 
-  signupForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    hideMessages();
-    clearErrors();
+// ===== HELPER FUNCTIONS =====
+function getUsers() {
+  return JSON.parse(localStorage.getItem("voyaUsers") || "[]");
+}
 
-    const name = document.getElementById("signupName").value.trim();
-    const email = document
-      .getElementById("signupEmail")
-      .value.trim()
-      .toLowerCase();
-    const password = document.getElementById("signupPassword").value;
+function createSession(email, name, remember) {
+  const session = {
+    email,
+    name,
+    loggedIn: true,
+    loginTime: Date.now(),
+    remember,
+    visitCount: 0,
+  };
+  localStorage.setItem("voyaSession", JSON.stringify(session));
+}
 
-    let isValid = true;
-
-    if (name.length < 2) {
-      document.getElementById("signupNameError").style.display = "block";
-      isValid = false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      document.getElementById("signupEmailError").style.display = "block";
-      isValid = false;
-    }
-    if (password.length < 6) {
-      document.getElementById("signupPasswordError").style.display = "block";
-      isValid = false;
-    }
-
-    if (!isValid) return;
-
-    const users = JSON.parse(localStorage.getItem("voyaUsers") || "[]");
-
-    if (users.some((user) => user.email === email)) {
-      if (errorText)
-        errorText.textContent = "An account with this email already exists";
-      if (errorMsg) errorMsg.style.display = "flex";
-      return;
-    }
-
-    users.push({ name, email, password });
-    localStorage.setItem("voyaUsers", JSON.stringify(users));
-
-    if (successMsg) {
-      successMsg.querySelector("span").textContent =
-        "Account created! Logging you in...";
-      successMsg.style.display = "flex";
-    }
-
-    setTimeout(() => {
-      localStorage.setItem(
-        "voyaSession",
-        JSON.stringify({
-          email,
-          name,
-          loggedIn: true,
-          loginTime: Date.now(),
-          remember: false,
-          visitCount: 0,
-        }),
-      );
-      window.location.href = "home.html";
-    }, 1200);
-  });
-
-  loginForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    hideMessages();
-    clearErrors();
-
-    const email = document
-      .getElementById("loginEmail")
-      .value.trim()
-      .toLowerCase();
-    const password = document.getElementById("loginPassword").value;
-    const rememberMe = document.getElementById("rememberMe").checked;
-
-    let isValid = true;
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      document.getElementById("loginEmailError").style.display = "block";
-      isValid = false;
-    }
-    if (!password) {
-      document.getElementById("loginPasswordError").style.display = "block";
-      isValid = false;
-    }
-
-    if (!isValid) return;
-
-    const users = JSON.parse(localStorage.getItem("voyaUsers") || "[]");
-    const user = users.find(
-      (u) => u.email === email && u.password === password,
-    );
-
-    if (!user) {
-      if (errorText) errorText.textContent = "Invalid email or password";
-      if (errorMsg) errorMsg.style.display = "flex";
-      return;
-    }
-
-    if (successMsg) {
-      successMsg.querySelector("span").textContent = "Login successful!";
-      successMsg.style.display = "flex";
-    }
-
-    setTimeout(() => {
-      localStorage.setItem(
-        "voyaSession",
-        JSON.stringify({
-          email,
-          name: user.name,
-          loggedIn: true,
-          loginTime: Date.now(),
-          remember: rememberMe,
-          visitCount: 0,
-        }),
-      );
-      window.location.href = "home.html";
-    }, 1200);
-  });
-
-  function clearErrors() {
-    document.querySelectorAll(".login-error-text").forEach((el) => {
-      el.style.display = "none";
-    });
+function checkExistingSession() {
+  const session = JSON.parse(localStorage.getItem("voyaSession"));
+  if (session?.loggedIn && session.remember) {
+    // Auto-redirect if "remember me" was checked
+    redirectToHome();
   }
+}
 
-  function hideMessages() {
-    if (successMsg) successMsg.style.display = "none";
-    if (errorMsg) errorMsg.style.display = "none";
-    if (sessionExpiredMsg) sessionExpiredMsg.style.display = "none";
+function checkSessionExpiry() {
+  const session = JSON.parse(localStorage.getItem("voyaSession"));
+  const urlParams = new URLSearchParams(window.location.search);
+
+  if (urlParams.get("expired") === "true") {
+    sessionExpiredMsg.style.display = "flex";
+    localStorage.removeItem("voyaSession");
+  } // Example: expire after 3 visits if not "remember me"
+
+  if (session?.loggedIn && !session.remember) {
+    session.visitCount = (session.visitCount || 0) + 1;
+    if (session.visitCount >= 3) {
+      localStorage.removeItem("voyaSession");
+      window.location.href = "index.html?expired=true";
+    } else {
+      localStorage.setItem("voyaSession", JSON.stringify(session));
+    }
   }
+}
+
+function redirectToHome() {
+  window.location.href = "home.html";
+}
+
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function showFieldError(id) {
+  document.getElementById(id).style.display = "block";
+}
+
+function clearErrors() {
+  document.querySelectorAll(".login-error-text").forEach((el) => {
+    el.style.display = "none";
+  });
+}
+
+function showSuccess(text) {
+  successMsg.querySelector("span").textContent = text;
+  successMsg.style.display = "flex";
+  errorMsg.style.display = "none";
+  sessionExpiredMsg.style.display = "none";
+}
+
+function showError(text) {
+  errorText.textContent = text;
+  errorMsg.style.display = "flex";
+  successMsg.style.display = "none";
+  sessionExpiredMsg.style.display = "none";
+}
+
+function hideMessages() {
+  successMsg.style.display = "none";
+  errorMsg.style.display = "none";
+  sessionExpiredMsg.style.display = "none";
 }
 
 // ============================================
