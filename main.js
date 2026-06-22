@@ -1588,18 +1588,8 @@ function checkSessionExpiry() {
   if (urlParams.get("expired") === "true") {
     sessionExpiredMsg.style.display = "flex";
     localStorage.removeItem("voyaSession");
-  } // Example: expire after 3 visits if not "remember me"
-
-  if (session?.loggedIn && !session.remember) {
-    session.visitCount = (session.visitCount || 0) + 1;
-    if (session.visitCount >= 3) {
-      localStorage.removeItem("voyaSession");
-      window.location.href = "index.html?expired=true";
-    } else {
-      localStorage.setItem("voyaSession", JSON.stringify(session));
-    }
   }
-}
+
 
 function redirectToHome() {
   window.location.href = "home.html";
