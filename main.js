@@ -1314,7 +1314,7 @@ function initHomePage() {
 }
 
 // ============================================
-// 8. CONTACT PAGE - FIXED
+// 8. CONTACT PAGE
 // ============================================
 function initContactPage() {
   if (!document.getElementById("contactForm")) return;
@@ -1423,80 +1423,29 @@ function initContactPage() {
 }
 
 // ============================================
-// 9. LOGIN PAGE - FIXED WITH INSTANT REDIRECT
+// 9. LOGIN PAGE
 // ============================================
-// ============================================
-// 9. LOGIN PAGE - FIXED WITH INSTANT REDIRECT
-// ============================================
-document.addEventListener("DOMContentLoaded", () => {
-  // ===== THEME + COLOR SWITCHER =====
-  const html = document.documentElement;
-  const themeToggle = document.getElementById("theme-toggle");
-  const colorBtns = document.querySelectorAll(".color-btn");
-
-  // Load saved theme
-  const savedTheme = localStorage.getItem("voyaTheme") || "light";
-  const savedColor = localStorage.getItem("voyaColor") || "blue";
-  html.setAttribute("data-theme", savedTheme);
-  html.setAttribute("data-color", savedColor);
-
-  updateThemeIcon(savedTheme);
-  updateActiveColorBtn(savedColor);
-
-  themeToggle?.addEventListener("click", () => {
-    const currentTheme = html.getAttribute("data-theme");
-    const newTheme = currentTheme === "light" ? "dark" : "light";
-    html.setAttribute("data-theme", newTheme);
-    localStorage.setItem("voyaTheme", newTheme);
-    updateThemeIcon(newTheme);
-  });
-
-  colorBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const color = btn.dataset.color;
-      html.setAttribute("data-color", color);
-      localStorage.setItem("voyaColor", color);
-      updateActiveColorBtn(color);
-    });
-  });
-
-  function updateThemeIcon(theme) {
-    const icon = themeToggle?.querySelector(".material-symbols-outlined");
-    if (icon) icon.textContent = theme === "light" ? "dark_mode" : "light_mode";
-  }
-
-  function updateActiveColorBtn(color) {
-    colorBtns.forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.color === color);
-    });
-  }
-
-  // ===== MOBILE MENU =====
-  const menuBtn = document.getElementById("menu-btn");
-  const navLinks = document.getElementById("nav-links");
-
-  menuBtn?.addEventListener("click", () => {
-    navLinks.classList.toggle("active");
-    const icon = menuBtn.querySelector(".material-symbols-outlined");
-    icon.textContent = navLinks.classList.contains("active") ? "close" : "menu";
-  });
-
-  // ===== AUTH LOGIC =====
+function initLoginPage() {
   const loginForm = document.getElementById("loginForm");
   const signupForm = document.getElementById("signupForm");
   const showSignupBtn = document.getElementById("showSignup");
   const showLoginBtn = document.getElementById("showLogin");
-
   const successMsg = document.getElementById("successMessage");
   const errorMsg = document.getElementById("errorMessage");
   const errorText = document.getElementById("errorText");
   const sessionExpiredMsg = document.getElementById("sessionExpiredMessage");
 
-  // Check if already logged in
-  checkExistingSession();
-  checkSessionExpiry();
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("expired") === "true" && sessionExpiredMsg) {
+    sessionExpiredMsg.style.display = "flex";
+  }
 
-  // Toggle between login/signup forms
+  const session = JSON.parse(localStorage.getItem("voyaSession"));
+  if (session?.loggedIn && session.remember) {
+    window.location.href = "home.html";
+    return;
+  }
+
   showSignupBtn?.addEventListener("click", () => {
     loginForm.style.display = "none";
     signupForm.style.display = "block";
@@ -1511,7 +1460,6 @@ document.addEventListener("DOMContentLoaded", () => {
     clearErrors();
   });
 
-  // ===== SIGNUP =====
   signupForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     hideMessages();
@@ -1527,43 +1475,54 @@ document.addEventListener("DOMContentLoaded", () => {
     let isValid = true;
 
     if (name.length < 2) {
-      showFieldError("signupNameError");
+      document.getElementById("signupNameError").style.display = "block";
       isValid = false;
     }
-    if (!validateEmail(email)) {
-      showFieldError("signupEmailError");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById("signupEmailError").style.display = "block";
       isValid = false;
     }
     if (password.length < 6) {
-      showFieldError("signupPasswordError");
+      document.getElementById("signupPasswordError").style.display = "block";
       isValid = false;
     }
 
     if (!isValid) return;
 
-    // Get existing users
-    const users = getUsers();
+    const users = JSON.parse(localStorage.getItem("voyaUsers") || "[]");
 
-    // Check if email already exists
     if (users.some((user) => user.email === email)) {
-      showError("An account with this email already exists");
+      if (errorText)
+        errorText.textContent = "An account with this email already exists";
+      if (errorMsg) errorMsg.style.display = "flex";
       return;
     }
 
-    // Create new user
     users.push({ name, email, password });
     localStorage.setItem("voyaUsers", JSON.stringify(users));
 
-    showSuccess("Account created! Logging you in...");
+    if (successMsg) {
+      successMsg.querySelector("span").textContent =
+        "Account created! Logging you in...";
+      successMsg.style.display = "flex";
+    }
 
-    // Auto login after signup
     setTimeout(() => {
-      createSession(email, name, false);
-      redirectToHome();
+      localStorage.setItem(
+        "voyaSession",
+        JSON.stringify({
+          email,
+          name,
+          loggedIn: true,
+          loginTime: Date.now(),
+          remember: false,
+          visitCount: 0,
+        }),
+      );
+      window.location.href = "home.html";
     }, 1200);
   });
 
-  // ===== LOGIN =====
   loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     hideMessages();
@@ -1578,92 +1537,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let isValid = true;
 
-    if (!validateEmail(email)) {
-      showFieldError("loginEmailError");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById("loginEmailError").style.display = "block";
       isValid = false;
     }
     if (!password) {
-      showFieldError("loginPasswordError");
+      document.getElementById("loginPasswordError").style.display = "block";
       isValid = false;
     }
 
     if (!isValid) return;
 
-    const users = getUsers();
+    const users = JSON.parse(localStorage.getItem("voyaUsers") || "[]");
     const user = users.find(
       (u) => u.email === email && u.password === password,
     );
 
     if (!user) {
-      showError("Invalid email or password");
+      if (errorText) errorText.textContent = "Invalid email or password";
+      if (errorMsg) errorMsg.style.display = "flex";
       return;
     }
 
-    showSuccess("Login successful!");
-    createSession(email, user.name, rememberMe);
+    if (successMsg) {
+      successMsg.querySelector("span").textContent = "Login successful!";
+      successMsg.style.display = "flex";
+    }
 
     setTimeout(() => {
-      redirectToHome();
+      localStorage.setItem(
+        "voyaSession",
+        JSON.stringify({
+          email,
+          name: user.name,
+          loggedIn: true,
+          loginTime: Date.now(),
+          remember: rememberMe,
+          visitCount: 0,
+        }),
+      );
+      window.location.href = "home.html";
     }, 1200);
   });
-
-  // ===== HELPER FUNCTIONS =====
-  function getUsers() {
-    return JSON.parse(localStorage.getItem("voyaUsers") || "[]");
-  }
-
-  function createSession(email, name, remember) {
-    const session = {
-      email,
-      name,
-      loggedIn: true,
-      loginTime: Date.now(),
-      remember,
-      visitCount: 0,
-    };
-    localStorage.setItem("voyaSession", JSON.stringify(session));
-  }
-
-  function checkExistingSession() {
-    const session = JSON.parse(localStorage.getItem("voyaSession"));
-    if (session?.loggedIn && session.remember) {
-      // Auto-redirect if "remember me" was checked
-      redirectToHome();
-    }
-  }
-
-  function checkSessionExpiry() {
-    const session = JSON.parse(localStorage.getItem("voyaSession"));
-    const urlParams = new URLSearchParams(window.location.search);
-
-    if (urlParams.get("expired") === "true") {
-      sessionExpiredMsg.style.display = "flex";
-      localStorage.removeItem("voyaSession");
-    }
-
-    // Example: expire after 3 visits if not "remember me"
-    if (session?.loggedIn && !session.remember) {
-      session.visitCount = (session.visitCount || 0) + 1;
-      if (session.visitCount >= 3) {
-        localStorage.removeItem("voyaSession");
-        window.location.href = "index.html?expired=true";
-      } else {
-        localStorage.setItem("voyaSession", JSON.stringify(session));
-      }
-    }
-  }
-
-  function redirectToHome() {
-    window.location.href = "home.html";
-  }
-
-  function validateEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  function showFieldError(id) {
-    document.getElementById(id).style.display = "block";
-  }
 
   function clearErrors() {
     document.querySelectorAll(".login-error-text").forEach((el) => {
@@ -1671,26 +1586,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function showSuccess(text) {
-    successMsg.querySelector("span").textContent = text;
-    successMsg.style.display = "flex";
-    errorMsg.style.display = "none";
-    sessionExpiredMsg.style.display = "none";
-  }
-
-  function showError(text) {
-    errorText.textContent = text;
-    errorMsg.style.display = "flex";
-    successMsg.style.display = "none";
-    sessionExpiredMsg.style.display = "none";
-  }
-
   function hideMessages() {
-    successMsg.style.display = "none";
-    errorMsg.style.display = "none";
-    sessionExpiredMsg.style.display = "none";
+    if (successMsg) successMsg.style.display = "none";
+    if (errorMsg) errorMsg.style.display = "none";
+    if (sessionExpiredMsg) sessionExpiredMsg.style.display = "none";
   }
-});
+}
 
 // ============================================
 // 10. AUTH SYSTEM - GLOBAL
