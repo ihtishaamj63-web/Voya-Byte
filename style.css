@@ -1080,10 +1080,28 @@ nav {
 }
 .about-team-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 30px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+}
+
+@media (max-width: 1100px) {
+  .about-team-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .about-team-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .about-team-container {
+    grid-template-columns: 1fr;
+  }
 }
 .about-member {
   background: var(--card-bg);
