@@ -2959,3 +2959,309 @@ footer {
   position: relative; /* Allows for overlay positioning if needed later */
 }
 
+/* ============================================
+   MOBILE FIXES
+   ============================================ */
+
+/* Navigation - show hamburger menu on mobile */
+@media (max-width: 768px) {
+  .nav_menu_btn {
+    display: block;
+  }
+
+  .nav_links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--nav-bg);
+    flex-direction: column;
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 12px var(--nav-shadow);
+    gap: 1rem;
+  }
+
+  .nav_links.active {
+    display: flex;
+  }
+
+  nav {
+    padding: 0.9rem 1rem;
+    flex-wrap: wrap;
+  }
+
+  .nav_btns {
+    margin-top: 0;
+  }
+
+  .nav_btns .btn {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  /* Theme controls - move to top on mobile so they don't overlap content */
+  .theme-controls {
+    top: 0.75rem;
+    right: 0.5rem;
+    transform: none;
+    flex-direction: row;
+    padding: 0.4rem 0.6rem;
+    gap: 0.4rem;
+  }
+
+  .color-switcher {
+    flex-direction: row;
+    gap: 0.3rem;
+    padding-top: 0;
+    padding-left: 0.4rem;
+    border-top: none;
+    border-left: 1px solid var(--border-color);
+  }
+
+  .theme-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+  }
+
+  .color-btn {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Footer - stack on mobile */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 24px;
+  }
+
+  .footer-brand,
+  .footer-links,
+  .footer-contact,
+  .footer-follow {
+    align-items: center;
+  }
+
+  .footer-contact ul {
+    align-items: center;
+  }
+
+  .footer-contact ul li {
+    justify-content: center;
+  }
+
+  .footer-follow .footer-list {
+    justify-content: center;
+  }
+}
+
+/* Home page - fix review section overflow */
+@media (max-width: 768px) {
+  .ratings-card {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .box-top {
+    width: 90%;
+    max-width: 400px;
+    height: auto;
+    min-height: 200px;
+  }
+
+  .home_booking__container {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .home_booking__item {
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    padding: 1rem;
+  }
+
+  .home_banner-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .home_card__container {
+    grid-template-columns: 1fr;
+  }
+
+  .discover-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home_feature-card {
+    grid-template-columns: 1fr;
+  }
+
+  .home_img-header {
+    font-size: 1.8rem;
+  }
+
+  .discover-header {
+    font-size: 2rem;
+  }
+
+  .home-header-content h1 {
+    font-size: 2rem;
+  }
+
+  .home-header-content p {
+    font-size: 0.9rem;
+  }
+
+  /* Fix review form on mobile */
+  .home-section_review-container {
+    padding: 1rem;
+    margin: 0 0.5rem;
+  }
+
+  #home-section_reviewForm input,
+  #home-section_reviewForm textarea {
+    font-size: 0.9rem;
+  }
+}
+
+/* Services page - fix grid and filter on mobile */
+@media (max-width: 768px) {
+  .sv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sv-filter {
+    flex-direction: column;
+    padding: 0.6rem 0.8rem;
+    top: 56px;
+  }
+
+  .sv-filter input,
+  .sv-filter select {
+    min-width: 100%;
+  }
+
+  .sv-hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .sv-hero p {
+    font-size: 0.9rem;
+  }
+
+  .sv-section {
+    padding: 2rem 0.8rem;
+  }
+
+  .sv-deals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-modal-content {
+    margin: 0;
+    max-width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    padding: 1rem;
+  }
+
+  .booking-form-content {
+    max-width: 100%;
+    max-height: 100vh;
+  }
+}
+
+/* About page - team grid on mobile */
+@media (max-width: 768px) {
+  .about-hero h1 {
+    font-size: 2rem;
+  }
+
+  .about-hero p {
+    font-size: 0.9rem;
+  }
+
+  .about-team-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .about-section {
+    padding: 40px 5%;
+  }
+
+  .about-team {
+    padding: 40px 5%;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-team-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* FAQ page on mobile */
+@media (max-width: 768px) {
+  #faq-page {
+    padding: 24px 12px;
+    margin: 2rem auto;
+  }
+
+  .faq-trigger {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  .faq-paragraph {
+    padding: 12px;
+    font-size: 0.85rem;
+  }
+
+  .faq-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Contact page on mobile */
+@media (max-width: 768px) {
+  .contact-form-section {
+    padding: 40px 5%;
+  }
+
+  .form-container {
+    padding: 20px;
+  }
+
+  .team-container {
+    grid-template-columns: 1fr;
+  }
+
+  .team {
+    padding: 40px 5%;
+  }
+}
+
+/* Login page on mobile */
+@media (max-width: 768px) {
+  .login-form-container {
+    padding: 1.5rem;
+    margin: 0 1rem;
+  }
+}
+
+/* Fix the review section background and layout */
+@media (max-width: 768px) {
+  .reviews_ratings-card {
+    padding: 20px 10px;
+  }
+
+  .reviews_ratings-card .home-section_review-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1.5rem 1rem;
+  }
+}
