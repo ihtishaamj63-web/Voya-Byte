@@ -1425,48 +1425,272 @@ function initContactPage() {
 // ============================================
 // 9. LOGIN PAGE - FIXED WITH INSTANT REDIRECT
 // ============================================
-function initLoginPage() {
+// ============================================
+// 9. LOGIN PAGE - FIXED WITH INSTANT REDIRECT
+// ============================================
+document.addEventListener("DOMContentLoaded", () => {
+  // ===== THEME + COLOR SWITCHER =====
+  const html = document.documentElement;
+  const themeToggle = document.getElementById("theme-toggle");
+  const colorBtns = document.querySelectorAll(".color-btn");
+
+  // Load saved theme
+  const savedTheme = localStorage.getItem("voyaTheme") || "light";
+  const savedColor = localStorage.getItem("voyaColor") || "blue";
+  html.setAttribute("data-theme", savedTheme);
+  html.setAttribute("data-color", savedColor);
+
+  updateThemeIcon(savedTheme);
+  updateActiveColorBtn(savedColor);
+
+  themeToggle?.addEventListener("click", () => {
+    const currentTheme = html.getAttribute("data-theme");
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    html.setAttribute("data-theme", newTheme);
+    localStorage.setItem("voyaTheme", newTheme);
+    updateThemeIcon(newTheme);
+  });
+
+  colorBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const color = btn.dataset.color;
+      html.setAttribute("data-color", color);
+      localStorage.setItem("voyaColor", color);
+      updateActiveColorBtn(color);
+    });
+  });
+
+  function updateThemeIcon(theme) {
+    const icon = themeToggle?.querySelector(".material-symbols-outlined");
+    if (icon) icon.textContent = theme === "light" ? "dark_mode" : "light_mode";
+  }
+
+  function updateActiveColorBtn(color) {
+    colorBtns.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.color === color);
+    });
+  }
+
+  // ===== MOBILE MENU =====
+  const menuBtn = document.getElementById("menu-btn");
+  const navLinks = document.getElementById("nav-links");
+
+  menuBtn?.addEventListener("click", () => {
+    navLinks.classList.toggle("active");
+    const icon = menuBtn.querySelector(".material-symbols-outlined");
+    icon.textContent = navLinks.classList.contains("active") ? "close" : "menu";
+  });
+
+  // ===== AUTH LOGIC =====
   const loginForm = document.getElementById("loginForm");
   const signupForm = document.getElementById("signupForm");
   const showSignupBtn = document.getElementById("showSignup");
   const showLoginBtn = document.getElementById("showLogin");
-  const successMessage = document.getElementById("successMessage");
-  const errorMessage = document.getElementById("errorMessage");
-  const sessionExpiredMessage = document.getElementById(
-    "sessionExpiredMessage",
-  );
 
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get("expired") === "true" && sessionExpiredMessage) {
-    sessionExpiredMessage.style.display = "block";
+  const successMsg = document.getElementById("successMessage");
+  const errorMsg = document.getElementById("errorMessage");
+  const errorText = document.getElementById("errorText");
+  const sessionExpiredMsg = document.getElementById("sessionExpiredMessage");
+
+  // Check if already logged in
+  checkExistingSession();
+  checkSessionExpiry();
+
+  // Toggle between login/signup forms
+  showSignupBtn?.addEventListener("click", () => {
+    loginForm.style.display = "none";
+    signupForm.style.display = "block";
+    hideMessages();
+    clearErrors();
+  });
+
+  showLoginBtn?.addEventListener("click", () => {
+    signupForm.style.display = "none";
+    loginForm.style.display = "block";
+    hideMessages();
+    clearErrors();
+  });
+
+  // ===== SIGNUP =====
+  signupForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    hideMessages();
+    clearErrors();
+
+    const name = document.getElementById("signupName").value.trim();
+    const email = document
+      .getElementById("signupEmail")
+      .value.trim()
+      .toLowerCase();
+    const password = document.getElementById("signupPassword").value;
+
+    let isValid = true;
+
+    if (name.length < 2) {
+      showFieldError("signupNameError");
+      isValid = false;
+    }
+    if (!validateEmail(email)) {
+      showFieldError("signupEmailError");
+      isValid = false;
+    }
+    if (password.length < 6) {
+      showFieldError("signupPasswordError");
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    // Get existing users
+    const users = getUsers();
+
+    // Check if email already exists
+    if (users.some((user) => user.email === email)) {
+      showError("An account with this email already exists");
+      return;
+    }
+
+    // Create new user
+    users.push({ name, email, password });
+    localStorage.setItem("voyaUsers", JSON.stringify(users));
+
+    showSuccess("Account created! Logging you in...");
+
+    // Auto login after signup
+    setTimeout(() => {
+      createSession(email, name, false);
+      redirectToHome();
+    }, 1200);
+  });
+
+  // ===== LOGIN =====
+  loginForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    hideMessages();
+    clearErrors();
+
+    const email = document
+      .getElementById("loginEmail")
+      .value.trim()
+      .toLowerCase();
+    const password = document.getElementById("loginPassword").value;
+    const rememberMe = document.getElementById("rememberMe").checked;
+
+    let isValid = true;
+
+    if (!validateEmail(email)) {
+      showFieldError("loginEmailError");
+      isValid = false;
+    }
+    if (!password) {
+      showFieldError("loginPasswordError");
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    const users = getUsers();
+    const user = users.find(
+      (u) => u.email === email && u.password === password,
+    );
+
+    if (!user) {
+      showError("Invalid email or password");
+      return;
+    }
+
+    showSuccess("Login successful!");
+    createSession(email, user.name, rememberMe);
+
+    setTimeout(() => {
+      redirectToHome();
+    }, 1200);
+  });
+
+  // ===== HELPER FUNCTIONS =====
+  function getUsers() {
+    return JSON.parse(localStorage.getItem("voyaUsers") || "[]");
   }
 
-  const user = JSON.parse(localStorage.getItem("voyaUser") || "null");
-  if (user) {
+  function createSession(email, name, remember) {
+    const session = {
+      email,
+      name,
+      loggedIn: true,
+      loginTime: Date.now(),
+      remember,
+      visitCount: 0,
+    };
+    localStorage.setItem("voyaSession", JSON.stringify(session));
+  }
+
+  function checkExistingSession() {
+    const session = JSON.parse(localStorage.getItem("voyaSession"));
+    if (session?.loggedIn && session.remember) {
+      // Auto-redirect if "remember me" was checked
+      redirectToHome();
+    }
+  }
+
+  function checkSessionExpiry() {
+    const session = JSON.parse(localStorage.getItem("voyaSession"));
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.get("expired") === "true") {
+      sessionExpiredMsg.style.display = "flex";
+      localStorage.removeItem("voyaSession");
+    }
+
+    // Example: expire after 3 visits if not "remember me"
+    if (session?.loggedIn && !session.remember) {
+      session.visitCount = (session.visitCount || 0) + 1;
+      if (session.visitCount >= 3) {
+        localStorage.removeItem("voyaSession");
+        window.location.href = "index.html?expired=true";
+      } else {
+        localStorage.setItem("voyaSession", JSON.stringify(session));
+      }
+    }
+  }
+
+  function redirectToHome() {
     window.location.href = "home.html";
-    return;
   }
 
-  if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
-      localStorage.setItem(
-        "voyaUser",
-        JSON.stringify({ name: user.name, email: user.email }),
-      );
-      localStorage.setItem("voyaVisitCount", "0");
-      window.location.href = "home.html";
+  function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function showFieldError(id) {
+    document.getElementById(id).style.display = "block";
+  }
+
+  function clearErrors() {
+    document.querySelectorAll(".login-error-text").forEach((el) => {
+      el.style.display = "none";
     });
   }
 
-  if (signupForm) {
-    signupForm.addEventListener("submit", (e) => {
-      localStorage.setItem("voyaUsers", JSON.stringify(users));
-      localStorage.setItem("voyaUser", JSON.stringify({ name, email }));
-      localStorage.setItem("voyaVisitCount", "0");
-      window.location.href = "home.html";
-    });
+  function showSuccess(text) {
+    successMsg.querySelector("span").textContent = text;
+    successMsg.style.display = "flex";
+    errorMsg.style.display = "none";
+    sessionExpiredMsg.style.display = "none";
   }
-}
+
+  function showError(text) {
+    errorText.textContent = text;
+    errorMsg.style.display = "flex";
+    successMsg.style.display = "none";
+    sessionExpiredMsg.style.display = "none";
+  }
+
+  function hideMessages() {
+    successMsg.style.display = "none";
+    errorMsg.style.display = "none";
+    sessionExpiredMsg.style.display = "none";
+  }
+});
 
 // ============================================
 // 10. AUTH SYSTEM - GLOBAL
