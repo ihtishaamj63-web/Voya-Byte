@@ -50,10 +50,25 @@ function updateActiveColorBtn(color) {
 function initMobileMenu() {
   const menuBtn = document.getElementById("menu-btn");
   const navLinks = document.getElementById("nav-links");
+  
   if (!menuBtn || !navLinks) return;
-  menuBtn.addEventListener("click", () => navLinks.classList.toggle("active"));
+  
+  menuBtn.addEventListener("click", () => {
+    navLinks.classList.toggle("active");
+    // Swap the icon between menu and close
+    const icon = menuBtn.querySelector(".material-symbols-outlined");
+    if (icon) {
+      icon.textContent = navLinks.classList.contains("active") ? "close" : "menu";
+    }
+  });
+
+  // Close menu when a link is clicked
   navLinks.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => navLinks.classList.remove("active"));
+    link.addEventListener("click", () => {
+      navLinks.classList.remove("active");
+      const icon = menuBtn.querySelector(".material-symbols-outlined");
+      if (icon) icon.textContent = "menu";
+    });
   });
 }
 
@@ -1425,18 +1440,6 @@ function initContactPage() {
 // ============================================
 // 9. LOGIN PAGE - FIXED WITH INSTANT REDIRECT
 // ============================================
-
-// ===== MOBILE MENU =====
-const menuBtn = document.getElementById("menu-btn");
-const navLinks = document.getElementById("nav-links");
-
-menuBtn?.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-  const icon = menuBtn.querySelector(".material-symbols-outlined");
-  icon.textContent = navLinks.classList.contains("active") ? "close" : "menu";
-});
-
-// ===== AUTH LOGIC =====
 const loginForm = document.getElementById("loginForm");
 const signupForm = document.getElementById("signupForm");
 const showSignupBtn = document.getElementById("showSignup");
